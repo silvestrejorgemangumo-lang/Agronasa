@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TerraViva — Planejamento agrícola</title>
+
+  <!-- Leaflet: biblioteca para exibir mapas. -->
+  <link rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+  <!-- Leaflet.draw: controles para desenhar áreas no mapa. -->
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css">
+
+  <style>
+    :root {
+      --green: #245c45;
+      --green-dark: #194632;
+      --green-soft: #e8f1eb;
+      --cream: #f7f6f0;
+      --ink: #1d2b24;
+      --muted: #64736a;
+      --line: #dce4dd;
+      --white: #fff;
+      --orange: #e69b45;
+      --shadow: 0 10px 28px rgba(27, 55, 39, .08);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--cream);
+      color: var(--ink);
+      font-size: 16px;
+      line-height: 1.5;
+    }
+
+    button, input, select, textarea { font: inherit; }
+
+    button:focus-visible, input:focus-visible,
+    select:focus-visible, textarea:focus-visible {
+      outline: 3px solid #e69b45;
+      outline-offset: 2px;
+    }
+
+    .hidden { display: none !important; }
+
+    /* Login */
+    .login-screen {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr);
+      background: var(--green-dark);
+    }
+
+    .login-story {
+      padding: clamp(32px, 7vw, 90px);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background:
+        linear-gradient(135deg, rgba(20, 58, 39, .88), rgba(32, 83, 59, .78)),
+        radial-gradient(ellipse at 75% 30%, #83a76f, #245c45 55%, #163b2b);
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: .02em;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(255,255,255,.16);
+      font-size: 1.45rem;
+    }
+
+    .login-story h1 {
+      max-width: 650px;
+      margin: 42px 0 14px;
+      font-size: clamp(2.2rem, 5vw, 4.4rem);
+      line-height: 1.08;
+    }
+
+    .login-story p {
+      max-width: 600px;
+      color: #e2eee4;
+      font-size: 1.15rem;
+    }
+
+    .story-note {
+      margin-top: 40px;
+      color: #d5e5d8;
+      font-size: .95rem;
+    }
+
+    .login-panel {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      background: var(--cream);
+    }
+
+    .login-card {
+      width: min(100%, 430px);
+      padding: clamp(24px, 4vw, 42px);
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .login-card h2 { margin: 0 0 6px; font-size: 1.8rem; }
+    .login-card > p { margin: 0 0 24px; color: var(--muted); }
+
+    label {
+      display: block;
+      margin: 16px 0 6px;
+      font-weight: 700;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid #bccbc0;
+      border-radius: 10px;
+      background: white;
+      color: var(--ink);
+    }
+
+    .primary-btn, .secondary-btn, .nav-btn {
+      min-height: 46px;
+      padding: 11px 16px;
+      border: 0;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary-btn {
+      color: white;
+      background: var(--green);
+    }
+
+    .primary-btn:hover { background: var(--green-dark); }
+
+    .secondary-btn {
+      color: var(--green-dark);
+      background: var(--green-soft);
+      border: 1px solid #c9dbce;
+    }
+
+    .full-width { width: 100%; margin-top: 22px; }
+
+    .small-note {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+
+    /* Aplicação */
+    .app-shell { min-height: 100vh; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px clamp(16px, 4vw, 44px);
+      background: white;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar .brand { color: var(--green-dark); }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .top-actions select {
+      width: auto;
+      min-width: 125px;
+      padding: 9px;
+    }
+
+    .logout-btn {
+      border: 0;
+      background: transparent;
+      color: var(--green-dark);
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 230px minmax(0, 1fr);
+      min-height: calc(100vh - 68px);
+    }
+
+    .sidebar {
+      padding: 24px 16px;
+      background: #f0f3ed;
+      border-right: 1px solid var(--line);
+    }
+
+    .sidebar-label {
+      margin: 0 10px 10px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav-btn {
+      width: 100%;
+      margin-bottom: 8px;
+      text-align: left;
+      color: var(--green-dark);
+      background: transparent;
+    }
+
+    .nav-btn.active, .nav-btn:hover { background: #dfeae1; }
+
+    .content {
+      width: 100%;
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: clamp(18px, 3vw, 36px);
+    }
+
+    .page-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .page-heading h1 { margin: 0 0 4px; font-size: clamp(1.7rem, 3vw, 2.3rem); }
+    .page-heading p { margin: 0; color: var(--muted); }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 11px;
+      border-radius: 30px;
+      color: #694b16;
+      background: #fff2d6;
+      font-size: .85rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(300px, .85fr) minmax(0, 1.5fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      padding: 20px;
+      background: white;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2, .card h3 { margin: 0 0 8px; }
+    .card-intro { margin: 0 0 16px; color: var(--muted); }
+
+    .map-instructions {
+      margin: 12px 0;
+      padding: 12px;
+      background: var(--green-soft);
+      border-radius: 10px;
+      font-size: .93rem;
+    }
+
+    #map {
+      height: 480px;
+      min-height: 340px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      z-index: 1;
+    }
+
+    .coordinate-readout {
+      margin-top: 12px;
+      padding: 10px 12px;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+      background: #f7f8f6;
+      border-radius: 9px;
+      font-size: .9rem;
+    }
+
+    .priority-list {
+      display: grid;
+      gap: 9px;
+      margin: 8px 0 18px;
+    }
+
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .check-row input {
+      width: 19px;
+      height: 19px;
+      margin: 2px 0 0;
+      accent-color: var(--green);
+      flex: 0 0 auto;
+    }
+
+    .check-row span { font-weight: 600; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 12px;
+    }
+
+    .form-grid .wide { grid-column: 1 / -1; }
+
+    .results {
+      margin-top: 18px;
+      padding: 16px;
+      border-left: 4px solid var(--orange);
+      background: #fff8e9;
+      border-radius: 8px;
+    }
+
+    .results h3 { margin-top: 0; }
+    .results ul { padding-left: 20px; }
+    .muted { color: var(--muted); }
+
+    /* Agente */
+    .agent-card { max-width: 850px; }
+
+    .agent-message {
+      min-height: 190px;
+      max-height: 390px;
+      overflow-y: auto;
+      padding: 14px;
+      margin: 16px 0;
+      background: #f6f8f5;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .message {
+      width: fit-content;
+      max-width: 90%;
+      padding: 11px 14px;
+      margin: 8px 0;
+      border-radius: 12px;
+      background: white;
+      border: 1px solid var(--line);
+      white-space: pre-wrap;
+    }
+
+    .message.user {
+      margin-left: auto;
+      color: white;
+      background: var(--green);
+    }
+
+    .chat-form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    @media (max-width: 900px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      #map { height: 420px; }
+    }
+
+    @media (max-width: 650px) {
+      .login-screen { grid-template-columns: 1fr; }
+      .login-story { min-height: 290px; padding: 28px; }
+      .login-story h1 { margin-top: 24px; font-size: 2.25rem; }
+      .story-note { margin-top: 18px; }
+      .login-panel { padding: 18px; }
+      .main-layout { grid-template-columns: 1fr; }
+      .sidebar {
+        display: flex;
+        gap: 8px;
+        padding: 10px 14px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .sidebar-label { display: none; }
+      .nav-btn { width: auto; margin: 0; text-align: center; }
+      .content { padding: 18px 14px; }
+      .page-heading { flex-direction: column; }
+      .topbar { padding: 10px 14px; }
+      .top-actions { gap: 4px; }
+      .top-actions select { min-width: 95px; }
+      .topbar .brand { font-size: 1rem; }
+      .brand-icon { width: 36px; height: 36px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .wide { grid-column: auto; }
+      .chat-form { grid-template-columns: 1fr; }
+      #map { height: 360px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Login de demonstração: não autentica de verdade. -->
+  <section id="loginScreen" class="login-screen">
+    <div class="login-story">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🌱</span>
+        <span>TerraViva</span>
+      </div>
+      <h1>Planeje rotações para uma terra mais resiliente.</h1>
+      <p>
+        Explore clima, solo e observações da Terra para comparar estratégias
+        agrícolas alinhadas às suas prioridades.
+      </p>
+      <div class="story-note">
+        Uma ferramenta de apoio à decisão — a experiência e o conhecimento local
+        continuam essenciais.
+      </div>
+    </div>
+
+    <div class="login-panel">
+      <form id="loginForm" class="login-card">
+        <h2>Bem-vindo</h2>
+        <p>Entre para acessar o seu espaço de planejamento.</p>
+
+        <label for="email">E-mail</label>
+        <input id="email" type="email" autocomplete="username"
+               placeholder="nome@exemplo.com" required>
+
+        <label for="password">Palavra-passe</label>
+        <input id="password" type="password" autocomplete="current-password"
+               placeholder="Digite a sua palavra-passe" required>
+
+        <button class="primary-btn full-width" type="submit">Entrar</button>
+        <p class="small-note">
+          Protótipo: use qualquer e-mail e palavra-passe para entrar.
+          A autenticação real deve ser ligada ao backend.
+        </p>
+      </form>
+    </div>
+  </section>
+
+  <div id="appShell" class="app-shell hidden">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🌱</span>
+        <span>TerraViva</span>
+      </div>
+      <div class="top-actions">
+        <label for="language" class="hidden">Idioma</label>
+        <select id="language" aria-label="Idioma da interface">
+          <option value="pt">Português</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+        <button id="logoutBtn" class="logout-btn" type="button">Sair</button>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <aside class="sidebar" aria-label="Navegação principal">
+        <p class="sidebar-label">Menu</p>
+        <button id="dashboardNav" class="nav-btn active" type="button">
+          📊 &nbsp;Dashboard
+        </button>
+        <button id="agentNav" class="nav-btn" type="button">
+          ✨ &nbsp;Agente AI
+        </button>
+      </aside>
+
+      <main class="content">
+        <section id="dashboardPage">
+          <div class="page-heading">
+            <div>
+              <h1>Seu planejamento agrícola</h1>
+              <p>Escolha uma localização e diga o que é mais importante para a sua fazenda.</p>
+            </div>
+            <span class="status-pill">● Modo demonstração</span>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="card" aria-labelledby="analysisTitle">
+              <h2 id="analysisTitle">1. Defina sua área</h2>
+              <p class="card-intro">
+                Clique no mapa para selecionar um ponto ou use as ferramentas
+                do mapa para desenhar sua parcela.
+              </p>
+
+              <div class="map-instructions">
+                <strong>Dica:</strong> para uma área, selecione o ícone de polígono
+                ou retângulo no canto do mapa e desenhe os limites do campo.
+              </div>
+
+              <div id="map" role="application" aria-label="Mapa interativo mundial"></div>
+              <div id="coordinates" class="coordinate-readout" aria-live="polite">
+                Nenhum local selecionado.
+              </div>
+
+              <h2 style="margin-top:22px">2. O que é prioridade?</h2>
+              <p class="card-intro">Escolha uma ou mais opções.</p>
+
+              <div class="priority-list">
+                <label class="check-row">
+                  <input type="checkbox" name="priority" value="solo">
+                  <span>Melhorar a saúde e a fertilidade do solo</span>
+                </label>
+                <label class="check-row">
+                  <input type="checkbox" name="priority" value="agua">
+                  <span>Conservar água e lidar com escassez</span>
+                </label>
+                <label class="check-row">
+                  <input type="checkbox" name="priority" value="seca">
+                  <span>Adaptar-se a calor e seca</span>
+                </label>
+                <label class="check-row">
+                  <input type="checkbox" name="priority" value="chuva">
+                  <span>Preparar-se para chuvas intensas e cheias</span>
+                </label>
+                <label class="check-row">
+                  <input type="checkbox" name="priority" value="risco">
+                  <span>Reduzir riscos e diversificar a produção</span>
+                </label>
+              </div>
+
+              <div class="form-grid">
+                <div class="wide">
+                  <label for="crop">Cultura principal ou cultura a avaliar</label>
+                  <select id="crop">
+                    <option value="">Selecione uma cultura</option>
+                    <option>Milho</option>
+                    <option>Arroz</option>
+                    <option>Trigo</option>
+                    <option>Soja</option>
+                    <option>Sorgo</option>
+                    <option>Feijão</option>
+                    <option>Mandioca</option>
+                    <option>Outra / ainda não sei</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="soilType">Tipo de solo (se souber)</label>
+                  <select id="soilType">
+                    <option value="">Não sei</option>
+                    <option>Arenoso</option>
+                    <option>Argiloso</option>
+                    <option>Franco / misto</option>
+                    <option>Orgânico</option>
+                    <option>Outro</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="waterAccess">Acesso à água</label>
+                  <select id="waterAccess">
+                    <option value="">Selecione</option>
+                    <option>Limitado</option>
+                    <option>Sazonal</option>
+                    <option>Disponível para irrigação</option>
+                    <option>Não sei</option>
+                  </select>
+                </div>
+              </div>
+
+              <button id="analyzeBtn" class="primary-btn full-width" type="button">
+                Analisar área e prioridades
+              </button>
+
+              <div id="analysisResult" class="results hidden" aria-live="polite"></div>
+            </section>
+
+            <section class="card">
+              <h2>Mapa da área selecionada</h2>
+              <p class="card-intro">
+                Use os controles do mapa para ampliar, mover e desenhar.
+                O mapa é apenas o primeiro passo da análise.
+              </p>
+              <div class="map-instructions">
+                <strong>Dados previstos para integração:</strong>
+                observações NASA, clima, informações locais de solo e
+                características das culturas. A disponibilidade e resolução
+                variam conforme a região.
+              </div>
+              <h3>Como a análise deverá funcionar</h3>
+              <ol>
+                <li>Selecionar um ponto ou desenhar o limite do campo.</li>
+                <li>Consultar clima e observações da Terra para a área.</li>
+                <li>Combinar os resultados com solo, cultura e prioridades.</li>
+                <li>Apresentar opções de rotação e explicar incertezas.</li>
+              </ol>
+              <p class="footer-note">
+                As recomendações reais devem considerar época de plantio,
+                práticas locais, disponibilidade de sementes e aconselhamento
+                agronômico.
+              </p>
+            </section>
+          </div>
+        </section>
+
+        <section id="agentPage" class="hidden">
+          <div class="page-heading">
+            <div>
+              <h1>Agente AI</h1>
+              <p>Explore perguntas sobre rotação de culturas e resiliência da fazenda.</p>
+            </div>
+          </div>
+
+          <section class="card agent-card">
+            <h2>Converse sobre seu plano</h2>
+            <p class="card-intro">
+              Por exemplo: “Que rotação pode ajudar a conservar água na minha área?”
+            </p>
+            <div id="chatMessages" class="agent-message" aria-live="polite">
+              <div class="message">
+                Olá! Posso ajudar a explorar ideias para o seu planejamento.
+                No protótipo, as respostas são demonstrativas e não substituem
+                uma análise agronômica local.
+              </div>
+            </div>
+            <form id="chatForm" class="chat-form">
+              <label class="hidden" for="chatInput">Sua pergunta</label>
+              <input id="chatInput" placeholder="Escreva a sua pergunta..."
+                     autocomplete="off" required>
+              <button class="primary-btn" type="submit">Enviar</button>
+            </form>
+            <p class="footer-note">
+              Conecte o endpoint do Agente AI no código para ativar respostas reais.
+            </p>
+          </section>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+
+  <script>
+    /*
+     * PONTOS DE INTEGRAÇÃO COM O BACKEND
+     * Configure URLs do seu servidor. Não coloque chaves secretas no frontend.
+     */
+    const API = {
+      loginUrl: "",     // Ex.: "https://seu-dominio/api/login"
+      analysisUrl: "",  // Ex.: "https://seu-dominio/api/analyze"
+      agentUrl: ""      // Ex.: "https://seu-dominio/api/agent"
+    };
+
+   
