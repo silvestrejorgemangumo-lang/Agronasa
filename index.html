@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AgroRota</title>
+<style>
+:root{--verde:#2F7D4F;--terra:#7A5233;--milho:#E3B23C;--agua:#2D7FA8;--bg:#F3F6EF;--ink:#1C2B22;--mut:#5E6E64;--line:#D6DFD3}
+*{box-sizing:border-box}body{margin:0;font:16px/1.5 system-ui,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--verde);color:#fff;padding:12px 16px;display:flex;gap:10px;align-items:center;justify-content:space-between;position:sticky;top:0}
+header b{font-size:18px}nav{display:flex;gap:6px}nav button{background:#ffffff26;color:#fff}nav button.on{background:#fff;color:var(--verde)}
+main{max-width:820px;margin:0 auto;padding:14px}
+.c{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{margin:0 0 10px;font-size:18px}input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;font:inherit;margin:4px 0 10px}
+button{border:0;border-radius:10px;padding:11px 15px;font:inherit;font-weight:600;cursor:pointer;background:var(--verde);color:#fff}button.s{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.g{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.k{border:1px solid var(--line);border-radius:10px;padding:10px}.k b{font-size:22px;display:block}
+.al{padding:10px;border-radius:10px;margin:6px 0;background:#FFF1CC}.al.alto{background:#FAD9D2}
+.rb{display:flex;gap:6px;margin:8px 0}.rb div{flex:1;text-align:center;border-radius:8px;padding:8px 4px;font-weight:600;font-size:14px}
+.cereal{background:var(--milho)}.leguminosa{background:var(--verde);color:#fff}.raiz{background:var(--terra);color:#fff}
+.r-alto{color:#B3261E}.r-médio{color:#9A6B00}.r-baixo{color:var(--verde)}small,.mut{color:var(--mut);font-size:14px}
+.big{display:grid;gap:12px;grid-template-columns:1fr 1fr}.big button{padding:34px 10px;font-size:19px}
+#chat{max-height:46vh;overflow:auto}.m{padding:9px 12px;border-radius:12px;margin:6px 0;max-width:88%}.eu{background:var(--verde);color:#fff;margin-left:auto}.ia{background:#EAF0E6}
+details{margin:6px 0}summary{cursor:pointer}
+</style></head><body>
+<header><b>🌱 AgroRota</b><nav id="nav" hidden><button id="bd">Dashboard</button><button id="ba">Agente de IA</button><button id="bs" class="s">Sair</button></nav></header>
+<main id="app"></main>
+<script>
+var T=sessionStorage.getItem("t"),PID=null,PS=[],$=function(i){return document.getElementById(i)};
+var LOC={"Xai-Xai":[-25.05,33.64],"Chókwè":[-24.53,32.98],"Maputo":[-25.97,32.57],"Inhambane":[-23.86,35.38],"Massingir":[-23.89,32.16]};
+function api(p,o){o=o||{};o.headers={"Content-Type":"application/json","Authorization":"Bearer "+T};if(o.body)o.body=JSON.stringify(o.body);
+ return fetch("/api"+p,o).then(function(r){return r.json().then(function(j){if(!r.ok){if(r.status==401&&T){sair()}throw new Error(j.detail||"Erro")}return j})})}
+function sair(){sessionStorage.clear();T=null;location.reload()}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function auth(){$("nav").hidden=true;$("app").innerHTML='<div class="c"><h2>Entrar</h2><label>Telefone ou email</label><input id="u" autocomplete="username"><label>Palavra-passe</label><input id="s" type="password" autocomplete="current-password"><label>Nome (só para criar conta)</label><input id="n"><button id="in">Entrar</button> <button class="s" id="rg">Criar conta</button><p id="e" class="mut"></p></div>';
+ function go(rota){api(rota,{method:"POST",body:{contacto:$("u").value,senha:$("s").value,nome:$("n").value}}).then(function(r){T=r.token;sessionStorage.setItem("t",T);escolha()}).catch(function(x){$("e").textContent=x.message})}
+ $("in").onclick=function(){go("/login")};$("rg").onclick=function(){go("/registo")}}
+function escolha(){$("nav").hidden=false;$("app").innerHTML='<div class="c"><h2>O que quer fazer?</h2><div class="big"><button id="d">📊 Dashboard</button><button id="a">🤖 Agente de IA</button></div></div>';
+ $("d").onclick=dash;$("a").onclick=agente}
+$("bd").onclick=function(){dash()};$("ba").onclick=function(){agente()};$("bs").onclick=sair;
+function nav(on){$("bd").className=on=="d"?"on":"";$("ba").className=on=="a"?"on":""}
+function carregarParcelas(cb){api("/parcelas").then(function(p){PS=p;if(!PID&&p.length)PID=p[0].id;cb()})}
+function dash(){nav("d");carregarParcelas(function(){
+ if(!PS.length)return formParcela();
+ var op=PS.map(function(p){return'<option value="'+p.id+'"'+(p.id==PID?" selected":"")+'>'+esc(p.nome)+'</option>'}).join("");
+ $("app").innerHTML='<div class="c"><label>Parcela</label><select id="sel">'+op+'</select><button class="s" id="np">+ Nova parcela</button></div><div id="w" class="c">A carregar o tempo...</div><div id="cl" class="c">A carregar o clima histórico...</div><div id="r" class="c">A calcular...</div><div id="h" class="c"></div>';
+ $("sel").onchange=function(){PID=this.value;dash()};$("np").onclick=formParcela;tempo();clima();rec();hist()})}
+function formParcela(){var o=Object.keys(LOC).map(function(k){return'<option>'+k+'</option>'}).join("");
+ $("app").innerHTML='<div class="c"><h2>Nova parcela</h2><label>Nome</label><input id="pn" value="Machamba 1"><label>Zona</label><select id="pz">'+o+'</select><button class="s" id="gps">Usar a minha localização</button><p id="gm" class="mut"></p>'+
+ '<label>Tipo de solo</label><select id="ps"><option value="franco">Franco</option><option value="arenoso">Arenoso</option><option value="argiloso">Argiloso</option></select>'+
+ '<label>Problema principal</label><select id="pp"><option value="seca">Pouca chuva ou seca</option><option value="excesso">Excesso de chuva</option><option value="solo">Solo fraco ou cansado</option><option value="pragas">Pragas e doenças</option><option value="erosao">Erosão</option><option value="custos">Custos altos de insumos</option><option value="colheita">Colheita baixa</option></select>'+
+ '<label>Prioridade</label><select id="pr"><option value="agua">Poupar água</option><option value="solo">Recuperar o solo</option><option value="prod">Colheita mais estável</option></select><button id="sv">Guardar</button></div>';
+ var pos=null;$("gps").onclick=function(){navigator.geolocation?navigator.geolocation.getCurrentPosition(function(p){pos=[p.coords.latitude,p.coords.longitude];$("gm").textContent="Localização obtida: "+pos[0].toFixed(3)+", "+pos[1].toFixed(3)},function(){$("gm").textContent="Sem permissão. Escolha a zona na lista."}):$("gm").textContent="Sem GPS. Escolha a zona."};
+ $("sv").onclick=function(){var l=pos||LOC[$("pz").value];api("/parcelas",{method:"POST",body:{nome:$("pn").value,lat:l[0],lon:l[1],solo:$("ps").value,problema:$("pp").value,prioridade:$("pr").value}}).then(function(r){PID=r.id;dash()})}}
+function tempo(){api("/parcelas/"+PID+"/tempo").then(function(d){var a=d.atual,y=d.diario;
+ $("w").innerHTML='<h2>Tempo agora</h2><div class="g"><div class="k"><b>'+a.temperature_2m+' °C</b><small>temperatura</small></div><div class="k"><b>'+a.relative_humidity_2m+'%</b><small>humidade</small></div><div class="k"><b>'+a.precipitation+' mm</b><small>chuva agora</small></div><div class="k"><b>'+a.wind_speed_10m+' km/h</b><small>vento</small></div></div>'+
+ d.alertas.map(function(x){return'<div class="al '+x.nivel+'">⚠ '+esc(x.texto)+'</div>'}).join("")+'<h2 style="margin-top:12px">Próximos 7 dias</h2><div class="g">'+y.time.map(function(t,i){return'<div class="k"><small>'+t.slice(5)+'</small><b>'+Math.round(y.temperature_2m_max[i])+'°</b><small>🌧 '+y.precipitation_sum[i]+' mm ('+(y.precipitation_probability_max[i]||0)+'%)</small></div>'}).join("")+'</div>'}).catch(function(e){$("w").innerHTML='<h2>Tempo</h2><p class="mut">'+esc(e.message)+'</p>'})}
+function clima(){api("/parcelas/"+PID+"/clima").then(function(c){var ys=c.anos,mx=Math.max.apply(null,ys.map(function(a){return a[1]})),n=ys.length,w=320/n;
+ $("cl").innerHTML='<h2>Clima histórico da zona (NASA POWER)</h2><div class="g"><div class="k"><b>'+c.chuva_media+' mm</b><small>chuva anual média</small></div><div class="k"><b>'+(c.tendencia>0?"+":"")+c.tendencia+'%</b><small>tendência por década</small></div><div class="k"><b>'+(c.temp_media==null?"-":c.temp_media+" °C")+'</b><small>temperatura média</small></div></div><svg viewBox="0 0 320 110" style="width:100%;margin-top:10px" role="img" aria-label="Chuva total por ano">'+ys.map(function(a,i){var hh=a[1]/mx*80;return'<rect x="'+(i*w+3)+'" y="'+(90-hh)+'" width="'+(w-6)+'" height="'+hh+'" rx="3" fill="#2D7FA8"/><text x="'+(i*w+w/2)+'" y="105" font-size="9" text-anchor="middle" fill="#5E6E64">'+String(a[0]).slice(2)+'</text>'}).join("")+'</svg><small>Chuva total por ano (mm). Fonte: '+esc(c.fonte)+'. Resolução de cerca de 50 km: descreve a zona, não a parcela.</small>'}).catch(function(e){$("cl").innerHTML='<h2>Clima histórico</h2><p class="mut">'+esc(e.message)+' As recomendações usam valores de reserva.</p>'})}
+function rec(){api("/parcelas/"+PID+"/recomendacoes").then(function(d){
+ $("r").innerHTML='<h2>Rotação, pragas e insumos</h2><p class="mut">Última cultura: '+(d.anterior||"sem registo")+'. Amarelo = cereal, verde = leguminosa, castanho = raiz.</p>'+d.estrategias.map(function(s,i){
+  return'<div class="c" style="margin:10px 0"><b>'+(i?"Opção "+(i+1):"Melhor para o seu objectivo")+'</b><div class="rb">'+s.calendario.map(function(c){var f=c.cultura;return'<div class="'+famil(f)+'"><small style="color:inherit">'+esc(c.epoca)+'</small><br>'+esc(f)+'</div>'}).join("")+'</div>'+
+  '<small>Água '+s.agua+' · Solo '+s.solo+' · Resiliência '+s.res+'</small><ul>'+s.why.map(function(w){return'<li>'+esc(w)+'</li>'}).join("")+'</ul>'+
+  s.calendario.map(function(c){return c.pragas.map(function(p){return'<details><summary>'+esc(c.cultura)+': '+esc(p.nome)+' — risco <b class="r-'+p.risco+'">'+p.risco+'</b></summary><p>'+esc(p.sintomas)+'</p><p><b>Prevenir:</b> '+esc(p.prevencao)+'</p><ul>'+p.controlo.map(function(x){return'<li>'+esc(x)+'</li>'}).join("")+'</ul></details>'}).join("")}).join("")+
+  '<button class="s" onclick="plano(\''+s.seq.join(",")+'\')">Escolher este plano</button></div>'}).join("")+'<p class="mut">'+esc(d.aviso)+'</p>'}).catch(function(e){$("r").textContent=e.message})}
+var FAM={"milho":"cereal","sorgo":"cereal","feijão-nhemba":"leguminosa","amendoim":"leguminosa","mandioca":"raiz","batata-doce":"raiz"};function famil(c){return FAM[c]||""}
+function plano(seq){seq=seq.split(",");var e=["Época 1","Época 2","Época 3"];Promise.all(seq.map(function(c,i){return api("/parcelas/"+PID+"/historico",{method:"POST",body:{epoca:e[i],cultura:c,estado:"planeada"}})})).then(hist)}
+function hist(){api("/parcelas/"+PID+"/historico").then(function(h){var o=Object.keys(FAM).map(function(k){return'<option>'+k+'</option>'}).join("");
+ $("h").innerHTML='<h2>Histórico de rotação</h2>'+(h.length?'<div class="rb" style="flex-wrap:wrap">'+h.map(function(r){return'<div class="'+famil(r.cultura)+'" style="min-width:110px">'+esc(r.cultura)+'<br><small style="color:inherit">'+esc(r.epoca)+' · '+r.estado+'</small><br><a href="#" onclick="rm('+r.id+');return false" style="color:inherit;font-size:13px">apagar</a></div>'}).join("")+'</div>':'<p class="mut">Ainda sem registos. Adicione o que plantou nas últimas épocas.</p>')+
+ '<div class="g"><input id="he" placeholder="Época (ex.: 2025/26 chuvosa)"><select id="hc">'+o+'</select></div><button class="s" id="ha">Adicionar ao histórico</button>';
+ $("ha").onclick=function(){api("/parcelas/"+PID+"/historico",{method:"POST",body:{epoca:$("he").value||"Época passada",cultura:$("hc").value}}).then(function(){dash()})}})}
+function rm(id){api("/historico/"+id,{method:"DELETE"}).then(hist)}
+function agente(){nav("a");carregarParcelas(function(){if(!PS.length)return formParcela();
+ $("app").innerHTML='<div class="c"><h2>Agente de IA</h2><p class="mut">Pergunte sobre agricultura: rotação, pragas, solo, rega, clima.</p><div id="chat"></div><div class="rb" style="flex-wrap:wrap">'+["Que pragas esperar esta época?","Por que rodar feijão depois do milho?","Como poupar água?"].map(function(q){return'<button class="s" onclick="ask(this.textContent)">'+q+'</button>'}).join("")+'</div><input id="q" placeholder="Escreva a sua pergunta"><button id="sd">Enviar</button></div>';
+ $("sd").onclick=function(){ask($("q").value)};$("q").onkeydown=function(e){if(e.key=="Enter")ask(this.value)}})}
+function ask(t){if(!t.trim())return;var c=$("chat");c.innerHTML+='<div class="m eu">'+esc(t)+'</div>';$("q").value="";c.scrollTop=1e9;
+ api("/agente",{method:"POST",body:{parcela_id:+PID,texto:t}}).then(function(r){c.innerHTML+='<div class="m ia">'+esc(r.resposta)+'</div>';c.scrollTop=1e9}).catch(function(e){c.innerHTML+='<div class="m ia">'+esc(e.message)+'</div>'})}
+T?escolha():auth();
+</script></body></html>
