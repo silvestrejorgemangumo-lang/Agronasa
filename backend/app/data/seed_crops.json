@@ -1,8 +1,56 @@
 [
- {"name":"Milho","family":"Poaceae","water_need":4,"drought_tolerance":2,"fixes_nitrogen":false,"cycle_days":120,"preferred_soils":"franco,argiloso"},
- {"name":"Feijão","family":"Fabaceae","water_need":3,"drought_tolerance":3,"fixes_nitrogen":true,"cycle_days":90,"preferred_soils":"franco,arenoso"},
- {"name":"Feijão-nhemba","family":"Fabaceae","water_need":2,"drought_tolerance":5,"fixes_nitrogen":true,"cycle_days":85,"preferred_soils":"arenoso,franco"},
- {"name":"Sorgo","family":"Poaceae","water_need":2,"drought_tolerance":5,"fixes_nitrogen":false,"cycle_days":110,"preferred_soils":"arenoso,franco,argiloso"},
- {"name":"Amendoim","family":"Fabaceae","water_need":2,"drought_tolerance":4,"fixes_nitrogen":true,"cycle_days":100,"preferred_soils":"arenoso,franco"},
- {"name":"Mapira","family":"Poaceae","water_need":2,"drought_tolerance":5,"fixes_nitrogen":false,"cycle_days":100,"preferred_soils":"arenoso,franco"}
+  {
+    "name": "Milho",
+    "family": "Poaceae",
+    "water_need": 4,
+    "drought_tolerance": 2,
+    "fixes_nitrogen": false,
+    "cycle_days": 120,
+    "preferred_soils": "franco,argiloso"
+  },
+  {
+    "name": "Feijão",
+    "family": "Fabaceae",
+    "water_need": 3,
+    "drought_tolerance": 3,
+    "fixes_nitrogen": true,
+    "cycle_days": 90,
+    "preferred_soils": "franco,arenoso"
+  },
+  {
+    "name": "Feijão-nhemba",
+    "family": "Fabaceae",
+    "water_need": 2,
+    "drought_tolerance": 5,
+    "fixes_nitrogen": true,
+    "cycle_days": 85,
+    "preferred_soils": "arenoso,franco"
+  },
+  {
+    "name": "Sorgo",
+    "family": "Poaceae",
+    "water_need": 2,
+    "drought_tolerance": 5,
+    "fixes_nitrogen": false,
+    "cycle_days": 110,
+    "preferred_soils": "arenoso,franco,argiloso"
+  },
+  {
+    "name": "Amendoim",
+    "family": "Fabaceae",
+    "water_need": 2,
+    "drought_tolerance": 4,
+    "fixes_nitrogen": true,
+    "cycle_days": 100,
+    "preferred_soils": "arenoso,franco"
+  },
+  {
+    "name": "Mapira",
+    "family": "Poaceae",
+    "water_need": 2,
+    "drought_tolerance": 5,
+    "fixes_nitrogen": false,
+    "cycle_days": 100,
+    "preferred_soils": "arenoso,franco"
+  }
 ]

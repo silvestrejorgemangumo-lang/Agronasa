@@ -1,94 +1,122 @@
 <!doctype html>
 <html lang="pt">
 <head>
-  <!-- CONFIGURAÇÕES DE METADADOS E CABEÇALHO
-       Define a codificação de caracteres, a responsividade para dispositivos móveis 
-       e os links para as folhas de estilo externas (Leaflet e CSS customizado). -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AGRONASA - Mozambique</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <aside class="sidebar" id="sidebar">
+    <a class="sidebar-brand" href="#" aria-label="AgroNASA início">
+      <span class="brand-mark">🌱</span><span>AGRONASA</span>
+    </a>
+    <div class="sidebar-caption" data-i18n="workspace">ESPAÇO DE TRABALHO</div>
+    <nav class="side-nav" aria-label="Navegação principal">
+      <a class="nav-link active" href="#analysis"><span class="nav-icon">⌂</span><span data-i18n="navAnalysis">Análise agrícola</span></a>
+      <a class="nav-link" href="#results"><span class="nav-icon">▥</span><span data-i18n="navResults">Resultados</span></a>
+      <a class="nav-link" href="#map"><span class="nav-icon">⌖</span><span data-i18n="navMap">Mapa</span></a>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="data-status"><span class="status-dot"></span><span data-i18n="dataStatus">Fontes de dados disponíveis</span></div>
+      <div class="sidebar-version">AGRONASA · Mozambique</div>
+    </div>
+  </aside>
 
-  <!-- CABEÇALHO DO SISTEMA (.brand)
-       Exibe a marca visual e o subtítulo descritivo da aplicação agrícola. -->
-  <header>
-    <div class="brand">🌱 AGRONASA - <span>Mozambique</span></div>
-    <p>Decisões agrícolas orientadas por dados climáticos e regras de rotação</p>
-  </header>
-
-  <!-- CONTEÚDO PRINCIPAL (Main) -->
-  <main>
-    
-    <!-- PAINEL DE ENTRADA / FORMULÁRIO DE ANÁLISE
-         Contém as instruções de uso, o container do mapa interativo, 
-         a exibição de coordenadas e o formulário de parâmetros agrícolas. -->
-    <section class="panel">
-      <h1>Analisar uma zona agrícola</h1>
-      <p class="muted">Clique no mapa para seleccionar um ponto aproximado. As coordenadas não são guardadas pelo servidor.</p>
-      
-      <!-- Mapa e indicador de coordenadas selecionadas -->
-      <div id="map" aria-label="Mapa para seleccionar localização"></div>
-      <div class="coords" id="coords">Nenhuma localização seleccionada.</div>
-      
-      <!-- Formulário de submissão de dados -->
-      <form id="analysis-form">
-        <div class="grid">
-          <!-- Seleção do tipo de solo -->
-          <label>Tipo de solo
-            <select id="soil" required>
-              <option value="">Seleccione</option>
-              <option value="arenoso">Arenoso</option>
-              <option value="franco">Franco</option>
-              <option value="argiloso">Argiloso</option>
-            </select>
-          </label>
-          
-          <!-- Seleção da prioridade agrícola -->
-          <label>Prioridade
-            <select id="priority" required>
-              <option value="poupar_agua">Poupar água</option>
-              <option value="recuperar_solo">Recuperar o solo</option>
-              <option value="maximizar_producao">Maximizar produção</option>
-            </select>
-          </label>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-button menu-toggle" id="menuToggle" aria-label="Abrir menu">☰</button>
+        <div>
+          <div class="topbar-eyebrow" data-i18n="topEyebrow">PLATAFORMA DE AGRICULTURA INTELIGENTE</div>
+          <div class="topbar-title" data-i18n="topTitle">Painel de controlo</div>
         </div>
-        
-        <!-- Seleção múltipla de culturas da época anterior -->
-        <label>Culturas da época anterior
-          <select id="previous" multiple size="4">
-            <option>Milho</option>
-            <option>Feijão</option>
-            <option>Feijão-nhemba</option>
-            <option>Sorgo</option>
-            <option>Amendoim</option>
-            <option>Mapira</option>
+      </div>
+      <div class="topbar-actions">
+        <label class="language-control" aria-label="Language">
+          <span class="language-icon">文</span>
+          <select id="languageSelect">
+            <option value="pt">PT</option>
+            <option value="en">EN</option>
           </select>
         </label>
-        
-        <!-- Botão de submissão -->
-        <button id="submit" type="submit">Gerar estratégias de rotação</button>
-      </form>
-    </section>
+        <div class="profile-wrap">
+          <button class="profile-button" id="profileButton" aria-expanded="false">
+            <span class="avatar">AG</span>
+            <span class="profile-text"><strong data-i18n="profile">Perfil</strong><small data-i18n="farmer">Agricultor</small></span>
+            <span class="chevron">⌄</span>
+          </button>
+          <div class="profile-menu hidden" id="profileMenu">
+            <div class="profile-menu-heading" data-i18n="account">A minha conta</div>
+            <button type="button" data-i18n="profileOption">Ver perfil</button>
+            <button type="button" data-i18n="settings">Definições</button>
+          </div>
+        </div>
+      </div>
+    </header>
 
-    <!-- PAINEL DE RESULTADOS (Inicialmente oculto pela classe .hidden)
-         Exibe avisos, métricas climáticas, estratégias recomendadas e fontes de dados. -->
-    <section id="results" class="panel hidden">
-      <h2>Resultado da análise</h2>
-      <div id="notice" class="notice"></div>
-      <div id="climate" class="climate-grid"></div>
-      <h3>Estratégias recomendadas</h3>
-      <div id="strategies" class="strategy-grid"></div>
-      <p id="sources" class="muted"></p>
-    </section>
+    <main id="analysis">
+      <section class="page-heading">
+        <div>
+          <div class="page-kicker" data-i18n="overview">VISÃO GERAL</div>
+          <h1 data-i18n="pageTitle">Analisar uma zona agrícola</h1>
+          <p class="muted" data-i18n="pageDescription">Explore as condições climáticas e descubra estratégias de rotação adequadas à sua propriedade.</p>
+        </div>
+        <div class="location-chip"><span>●</span><span data-i18n="country">Moçambique</span></div>
+      </section>
 
-  </main>
+      <section class="panel">
+        <h2 data-i18n="locationTitle">Localização agrícola</h2>
+        <p class="muted" data-i18n="mapHelp">Clique no mapa para seleccionar um ponto aproximado. As coordenadas não são guardadas pelo servidor.</p>
+        <div id="map" aria-label="Mapa para seleccionar localização"></div>
+        <div class="coords" id="coords" data-i18n="noLocation">Nenhuma localização seleccionada.</div>
+      </section>
 
-  <!-- SCRIPTS EXTERNOS
-       Carrega a biblioteca Leaflet.js para mapas e o script principal da aplicação. -->
+      <section class="panel">
+        <h2 data-i18n="parameters">Parâmetros da análise</h2>
+        <form id="analysis-form">
+          <div class="grid">
+            <label><span data-i18n="soilType">Tipo de solo</span>
+              <select id="soil" required>
+                <option value="" data-i18n="select">Seleccione</option>
+                <option value="arenoso" data-i18n="sandy">Arenoso</option>
+                <option value="franco" data-i18n="loamy">Franco</option>
+                <option value="argiloso" data-i18n="clayey">Argiloso</option>
+              </select>
+            </label>
+            <label><span data-i18n="priority">Prioridade</span>
+              <select id="priority" required>
+                <option value="poupar_agua" data-i18n="saveWater">Poupar água</option>
+                <option value="recuperar_solo" data-i18n="restoreSoil">Recuperar o solo</option>
+                <option value="maximizar_producao" data-i18n="maximize">Maximizar produção</option>
+              </select>
+            </label>
+          </div>
+          <label><span data-i18n="previousCrops">Culturas da época anterior</span>
+            <select id="previous" multiple size="4">
+              <option>Milho</option><option>Feijão</option><option>Feijão-nhemba</option>
+              <option>Sorgo</option><option>Amendoim</option><option>Mapira</option>
+            </select>
+            <small data-i18n="multiSelect">Pode seleccionar mais de uma cultura (Ctrl/Cmd + clique).</small>
+          </label>
+          <button id="submit" type="submit" data-i18n="submit">Gerar estratégias de rotação</button>
+        </form>
+      </section>
+
+      <section id="results" class="panel hidden">
+        <h2 data-i18n="resultsTitle">Resultado da análise</h2>
+        <div id="notice" class="notice"></div>
+        <div id="climate" class="climate-grid"></div>
+        <h3 data-i18n="recommended">Estratégias recomendadas</h3>
+        <div id="strategies" class="strategy-grid"></div>
+        <p id="sources" class="muted"></p>
+      </section>
+    </main>
+    <footer data-i18n="footer">AGRONASA · Apoio à decisão agrícola baseado em dados.</footer>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="/assets/js/app.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
