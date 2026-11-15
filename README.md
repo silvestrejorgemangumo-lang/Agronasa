@@ -58,6 +58,10 @@ Edite o ficheiro .env e ajuste a variável DATABASE_URL:
 ```
 DATABASE_URL=postgresql+psycopg://utilizador:senha@localhost:5432/agrosmart
 ```
+para testagem
+```
+SQLALCHEMY_DATABASE_URI=postgresql+psycopg://agrosmart:FELEC1DADE@127.0.0.1:5432/agrosmart_db
+```
 
 ### 5. Iniciar a Aplicação
 
