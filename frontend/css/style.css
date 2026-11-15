@@ -27,6 +27,7 @@ body{margin:0;min-height:100vh}
 .profile-wrap{position:relative}
 .profile-button{display:flex;align-items:center;gap:10px;background:transparent;color:#203b2c;padding:5px;border:0;margin:0;text-align:left}
 .avatar{width:37px;height:37px;border-radius:50%;background:#e1f0e3;color:#24613e;display:grid;place-items:center;font-size:12px;font-weight:800}
+.avatar svg{display:block;width:20px;height:20px}
 .profile-text{display:grid;gap:2px}
 .profile-text strong{font-size:12px}
 .profile-text small{font-size:10px;color:#819186;margin:0}
