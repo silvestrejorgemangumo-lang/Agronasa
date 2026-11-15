@@ -72,8 +72,30 @@
       <section class="panel">
         <h2 data-i18n="locationTitle">Localização agrícola</h2>
         <p class="muted" data-i18n="mapHelp">Clique no mapa para seleccionar um ponto aproximado. As coordenadas não são guardadas pelo servidor.</p>
+        <div class="location-search-wrap">
+          <form id="location-search" class="location-search" role="search">
+            <input id="location-query" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder" placeholder="Ex.: Maputo ou -25.97, 32.58" aria-label="Pesquisar lugar ou coordenadas">
+            <button type="submit" data-i18n="searchButton">Pesquisar</button>
+          </form>
+          <div id="location-suggestions" class="location-suggestions" role="listbox" aria-label="Sugestões de localização" hidden></div>
+          <p id="search-status" class="search-status" role="status" aria-live="polite"></p>
+          <small class="search-attribution">Pesquisa de locais: Photon / OpenStreetMap</small>
+        </div>
         <div id="map" aria-label="Mapa para seleccionar localização"></div>
         <div class="coords" id="coords" data-i18n="noLocation">Nenhuma localização seleccionada.</div>
+        <section class="environment-panel" aria-live="polite">
+          <div class="environment-heading">
+            <div>
+              <h3 data-i18n="environmentTitle">Dados ambientais da localização</h3>
+              <p class="muted" data-i18n="environmentHelp">Selecione um ponto no mapa para consultar as três fontes.</p>
+            </div>
+            <span id="environment-status" class="source-badge neutral" data-i18n="waiting">À espera do mapa</span>
+          </div>
+          <div id="environment-data" class="source-grid">
+            <p class="muted" data-i18n="environmentEmpty">Ainda não existem dados para apresentar.</p>
+          </div>
+          <p id="environment-note" class="muted"></p>
+        </section>
       </section>
 
       <section class="panel">
