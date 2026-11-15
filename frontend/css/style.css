@@ -1,0 +1,234 @@
+/* ==========================================================================
+   CONFIGURAÇÕES GLOBAIS E VARIÁVEIS (:root e Reset)
+   Define a fonte padrão, cores globais de texto e fundo da página, 
+   e aplica o box-sizing em todos os elementos para cálculo correto de tamanhos.
+   ========================================================================== */
+:root {
+  font-family: Inter, system-ui, Arial, sans-serif;
+  color: #183126;
+  background: #f2f6f2;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+/* ==========================================================================
+   CABEÇALHO (Header) E LOGotipo (.brand)
+   Estiliza o topo da página com cor de fundo escura, espaçamento responsivo 
+   e o destaque visual da marca.
+   ========================================================================== */
+header {
+  background: #174d36;
+  color: white;
+  padding: 25px max(5vw, 20px);
+}
+
+header p {
+  margin: 8px 0 0;
+  color: #d8e9dd;
+}
+
+.brand {
+  font-weight: 800;
+  font-size: 25px;
+}
+
+.brand span {
+  color: #b7e5a5;
+}
+
+/* ==========================================================================
+   LAYOUT PRINCIPAL E RODAPÉ (Main & Footer)
+   Controla a largura máxima centralizada do conteúdo principal e o alinhamento do rodapé.
+   ========================================================================== */
+main {
+  max-width: 1050px;
+  margin: 28px auto;
+  padding: 0 16px;
+}
+
+footer {
+  text-align: center;
+  padding: 18px;
+  color: #6b7c70;
+  font-size: 13px;
+}
+
+/* ==========================================================================
+   PAINÉIS (.panel) E TIPOGRAFIA (Títulos e Textos)
+   Define o design dos cartões/blocos em branco com bordas arredondadas e sombra,
+   além de padronizar títulos e textos secundários (muted/small).
+   ========================================================================== */
+.panel {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 22px;
+  box-shadow: 0 5px 24px #193c2610;
+}
+
+h1 {
+  margin-top: 0;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.muted,
+small {
+  color: #64766b;
+}
+
+.muted {
+  line-height: 1.5;
+}
+
+small {
+  display: block;
+  font-weight: 400;
+  margin-top: 5px;
+}
+
+/* ==========================================================================
+   MAPA E COORDENADAS (#map & .coords)
+   Estiliza a área reservada para o mapa interativo e a exibição textual das coordenadas.
+   ========================================================================== */
+#map {
+  height: 330px;
+  border-radius: 12px;
+  border: 1px solid #dce6dd;
+}
+
+.coords {
+  font-size: 13px;
+  color: #52665a;
+  padding: 9px 0;
+}
+
+/* ==========================================================================
+   SISTEMA DE GRIDS (.grid)
+   Cria um layout de colunas flexíveis/divididas lado a lado para organizar conteúdos.
+   ========================================================================== */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ==========================================================================
+   FORMULÁRIOS (Labels, Selects e Botões)
+   Estiliza os campos de entrada, rótulos e botões de ação para manter 
+   uma interface consistente e interativa.
+   ========================================================================== */
+label {
+  display: block;
+  font-weight: 650;
+  margin: 12px 0;
+}
+
+select {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+  padding: 11px;
+  border: 1px solid #cbd8ce;
+  border-radius: 8px;
+  background: white;
+  font: inherit;
+}
+
+select[multiple] {
+  height: auto;
+}
+
+button {
+  border: 0;
+  background: #197044;
+  color: white;
+  padding: 13px 20px;
+  border-radius: 9px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+/* ==========================================================================
+   COMPONENTES DE MÉTRICAS E ESTRATÉGIAS (.climate-grid, .metric, etc.)
+   Formata os cartões internos de indicadores climáticos, métricas e pontuações.
+   ========================================================================== */
+.climate-grid,
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.metric,
+.strategy {
+  padding: 15px;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  background: #fbfdfb;
+}
+
+.metric strong {
+  display: block;
+  font-size: 22px;
+  color: #17613d;
+}
+
+.strategy h4 {
+  margin: 0 0 7px;
+}
+
+.score {
+  font-size: 25px;
+  font-weight: 800;
+  color: #17613d;
+}
+
+/* ==========================================================================
+   UTILITÁRIOS E AVISOS (.notice, .hidden)
+   Classes utilitárias para destacar avisos na interface ou ocultar elementos.
+   ========================================================================== */
+.notice {
+  background: #f0f7ec;
+  padding: 12px;
+  border-radius: 9px;
+  margin: 12px 0;
+}
+
+.hidden {
+  display: none;
+}
+
+/* ==========================================================================
+   RESPONSIVIDADE (@media query)
+   Ajusta o layout para telas menores (como celulares abaixo de 650px), 
+   empilhando grids e redimensionando o mapa e os painéis.
+   ========================================================================== */
+@media(max-width: 650px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  #map {
+    height: 280px;
+  }
+  
+  .panel {
+    padding: 17px;
+  }
+}

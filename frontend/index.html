@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <!-- CONFIGURAÇÕES DE METADADOS E CABEÇALHO
+       Define a codificação de caracteres, a responsividade para dispositivos móveis 
+       e os links para as folhas de estilo externas (Leaflet e CSS customizado). -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AGRONASA - Mozambique</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/assets/css/style.css">
+</head>
+<body>
+
+  <!-- CABEÇALHO DO SISTEMA (.brand)
+       Exibe a marca visual e o subtítulo descritivo da aplicação agrícola. -->
+  <header>
+    <div class="brand">🌱 AGRONASA - <span>Mozambique</span></div>
+    <p>Decisões agrícolas orientadas por dados climáticos e regras de rotação</p>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL (Main) -->
+  <main>
+    
+    <!-- PAINEL DE ENTRADA / FORMULÁRIO DE ANÁLISE
+         Contém as instruções de uso, o container do mapa interativo, 
+         a exibição de coordenadas e o formulário de parâmetros agrícolas. -->
+    <section class="panel">
+      <h1>Analisar uma zona agrícola</h1>
+      <p class="muted">Clique no mapa para seleccionar um ponto aproximado. As coordenadas não são guardadas pelo servidor.</p>
+      
+      <!-- Mapa e indicador de coordenadas selecionadas -->
+      <div id="map" aria-label="Mapa para seleccionar localização"></div>
+      <div class="coords" id="coords">Nenhuma localização seleccionada.</div>
+      
+      <!-- Formulário de submissão de dados -->
+      <form id="analysis-form">
+        <div class="grid">
+          <!-- Seleção do tipo de solo -->
+          <label>Tipo de solo
+            <select id="soil" required>
+              <option value="">Seleccione</option>
+              <option value="arenoso">Arenoso</option>
+              <option value="franco">Franco</option>
+              <option value="argiloso">Argiloso</option>
+            </select>
+          </label>
+          
+          <!-- Seleção da prioridade agrícola -->
+          <label>Prioridade
+            <select id="priority" required>
+              <option value="poupar_agua">Poupar água</option>
+              <option value="recuperar_solo">Recuperar o solo</option>
+              <option value="maximizar_producao">Maximizar produção</option>
+            </select>
+          </label>
+        </div>
+        
+        <!-- Seleção múltipla de culturas da época anterior -->
+        <label>Culturas da época anterior
+          <select id="previous" multiple size="4">
+            <option>Milho</option>
+            <option>Feijão</option>
+            <option>Feijão-nhemba</option>
+            <option>Sorgo</option>
+            <option>Amendoim</option>
+            <option>Mapira</option>
+          </select>
+        </label>
+        
+        <!-- Botão de submissão -->
+        <button id="submit" type="submit">Gerar estratégias de rotação</button>
+      </form>
+    </section>
+
+    <!-- PAINEL DE RESULTADOS (Inicialmente oculto pela classe .hidden)
+         Exibe avisos, métricas climáticas, estratégias recomendadas e fontes de dados. -->
+    <section id="results" class="panel hidden">
+      <h2>Resultado da análise</h2>
+      <div id="notice" class="notice"></div>
+      <div id="climate" class="climate-grid"></div>
+      <h3>Estratégias recomendadas</h3>
+      <div id="strategies" class="strategy-grid"></div>
+      <p id="sources" class="muted"></p>
+    </section>
+
+  </main>
+
+  <!-- SCRIPTS EXTERNOS
+       Carrega a biblioteca Leaflet.js para mapas e o script principal da aplicação. -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/assets/js/app.js"></script>
+</body>
+</html>
